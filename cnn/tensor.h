@@ -56,12 +56,20 @@ struct Tensor {
 
   // get a tensor representing a single batch
   const Tensor& batch(unsigned b) const {
-    if(d.batches() == 1) return *this;
-    else                 return bs[b];
+    if(d.batches() == 1) {
+      return *this;
+    } else {
+      assert(d.batches() == bs.size());
+      return bs[b % bs.size()];
+    }
   }
   Tensor& batch(unsigned b) {
-    if(d.batches() == 1) return *this;
-    else                 return bs[b % bs.size()];
+    if(d.batches() == 1) {
+      return *this;
+    } else {
+      if(d.batches() != bs.size()) make_batches();
+      return bs[b % bs.size()];
+    }
   }
 
   Dim d;
@@ -75,7 +83,7 @@ struct Tensor {
       unsigned bsize = d.batch_size();
       Dim new_d = d; new_d.bd = 1;
       for(unsigned b = 0; b < d.batches(); ++b) {
-        bs.push_back(Tensor(new_d, v + bsize * b));
+        bs.push_back(Tensor(new_d, v + bsize * b * sizeof(float)));
       }
     }
   }

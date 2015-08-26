@@ -19,6 +19,8 @@ struct Dim {
   Dim() : nd(), bd(1) {}
   explicit Dim(int m) : nd(1), bd(1) { d[0] = m; }
   Dim(int m, int n) : nd(2), bd(1) { d[0] = m; d[1] = n; }
+  // TODO: The constructors for dimensions w/ and w/o batches is not intuitive.
+  //       can this be fixed in some way?
   Dim(std::initializer_list<long> x) : nd(), bd(1) {
     for(auto v : x) d[nd++] = v;
   }
@@ -45,6 +47,11 @@ struct Dim {
     for (int i = 1; i < s; ++i)
       if (size(i) > 1) m = i + 1;
     r.resize(m);
+    return r;
+  }
+  inline Dim single_batch() const {
+    Dim r = *this;
+    r.bd = 1;
     return r;
   }
   inline void resize(unsigned i) { nd = i; }

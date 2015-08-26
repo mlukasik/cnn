@@ -130,6 +130,7 @@ void ComputationGraph::PrintGraphviz() const {
   cerr << "digraph G {\n  rankdir=LR;\n  nodesep=.05;\n";
   unsigned nc = 0;
   for (auto node : nodes) {
+    cerr << "nodedim: " << node->dim << endl;
     vector<string> var_names;
     for (auto arg : node->args)
       var_names.push_back(string("v") + to_string((unsigned)arg));
