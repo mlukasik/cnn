@@ -32,11 +32,13 @@ typedef float real;
 
 struct Tensor {
   Tensor() = default;
-  Tensor(const Dim& d, float* v) : d(d), v(v) {}
+  Tensor(const Dim& d, float* v) : d(d), v(v) { make_batches(); }
   const Eigen::Map<Eigen::MatrixXf, Eigen::Aligned> operator*() const {
+    assert(d.batches() == 1);
     return Eigen::Map<Eigen::MatrixXf, Eigen::Aligned>(v, d.rows(), d.cols());
   }
   Eigen::Map<Eigen::MatrixXf, Eigen::Aligned> operator*() {
+    assert(d.batches() == 1);
     return Eigen::Map<Eigen::MatrixXf, Eigen::Aligned>(v, d.rows(), d.cols());
   }
   // this is very slow: use sparingly
@@ -51,10 +53,33 @@ struct Tensor {
     return true;
 #endif
   }
+
+  // get a tensor representing a single batch
+  const Tensor& batch(unsigned b) const {
+    if(d.batches() == 1) return *this;
+    else                 return bs[b];
+  }
+  Tensor& batch(unsigned b) {
+    if(d.batches() == 1) return *this;
+    else                 return bs[b % bs.size()];
+  }
+
   Dim d;
   float* v;
+  std::vector<Tensor> bs;
 
  private:
+  void make_batches() {
+    if(d.batches() != 1) {
+      bs.clear();
+      unsigned bsize = d.batch_size();
+      Dim new_d = d; new_d.bd = 1;
+      for(unsigned b = 0; b < d.batches(); ++b) {
+        bs.push_back(Tensor(new_d, v + bsize * b));
+      }
+    }
+  }
+
   friend class boost::serialization::access;
   template<class Archive>
   void save(Archive& ar, const unsigned int) const {

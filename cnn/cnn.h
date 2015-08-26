@@ -128,14 +128,48 @@ struct Node {
   virtual size_t aux_storage_size() const;
 
   // computation
-  virtual void forward(const std::vector<const Tensor*>& xs,
-                       Tensor& fx) const = 0;
+  virtual void forward_impl(const std::vector<const Tensor*>& xs,
+                            Tensor& fx) const = 0;
   // accumulates the derivative of E with respect to the ith argument to f, that is, xs[i]
+  virtual void backward_impl(const std::vector<const Tensor*>& xs,
+                             const Tensor& fx,
+                             const Tensor& dEdf,
+                             unsigned i,
+                             Tensor& dEdxi) const = 0;
+
+  // whether this node supports computing multiple batches in one call.
+  // if true, forward and backward will be called once with a multi-batch tensor.
+  // if false, forward and backward will be called multiple times for each item.
+  virtual bool supports_multibatch() const { return false; }
+
+  // perform the forward/backward passes in one or multiple calls
+  virtual void forward(const std::vector<const Tensor*>& xs,
+                       Tensor& fx) const final {
+    if(this->supports_multibatch() || fx.d.batches() == 1) {
+      forward_impl(xs, fx);
+    } else {
+      for(int b = 0; b < fx.d.batches(); ++b) {
+        std::vector<const Tensor*> xs_batch(xs.size());
+        for(int i = 0; i < xs.size(); ++i) xs_batch[i] = &xs[i]->batch(b);
+        forward_impl(xs_batch, fx.batch(b));
+      }
+    }
+  }
   virtual void backward(const std::vector<const Tensor*>& xs,
                         const Tensor& fx,
                         const Tensor& dEdf,
                         unsigned i,
-                        Tensor& dEdxi) const = 0;
+                        Tensor& dEdxi) const final {
+    if(this->supports_multibatch() || fx.d.batches() == 1) {
+      backward_impl(xs, fx, dEdf, i, dEdxi);
+    } else {
+      for(int b = 0; b < fx.d.batches(); ++b) {
+        std::vector<const Tensor*> xs_batch(xs.size());
+        for(int i = 0; i < xs.size(); ++i) xs_batch[i] = &xs[i]->batch(b);
+        backward_impl(xs_batch, fx.batch(b), dEdf.batch(b), i, dEdxi.batch(b));
+      }
+    }
+  }
 
   // number of arguments to the function
   inline unsigned arity() const { return args.size(); }
