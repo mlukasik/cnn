@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
 
   // parameters
   const unsigned HIDDEN_SIZE = 8;
-  const unsigned ITERATIONS = 30;
+  const unsigned ITERATIONS = 50;
   Model m;
   SimpleSGDTrainer sgd(&m);
   //MomentumSGDTrainer sgd(&m);
@@ -39,7 +39,6 @@ int main(int argc, char** argv) {
   Expression h = tanh(W*x + b);
   //Expression h = softsign(W*x + b);
   Expression y_pred = V*h + a;
-  cg.PrintGraphviz();
   Expression loss = squared_distance(y_pred, y);
 
   cg.PrintGraphviz();
@@ -56,7 +55,8 @@ int main(int argc, char** argv) {
     sgd.update(1.0);
     sgd.update_epoch();
     float loss = 0;
-    for(auto l : losses) loss += l;
+    for(auto l : losses)
+      loss += l;
     loss /= 4;
     cerr << "E = " << loss << endl;
   }

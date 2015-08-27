@@ -37,6 +37,7 @@ struct InputNode : public Node {
                   const Tensor& dEdf,
                   unsigned i,
                   Tensor& dEdxi) const override;
+  virtual bool supports_multibatch() const override { return true; }  
   Dim dim;
   const std::vector<float>* pdata;
 };
@@ -53,6 +54,7 @@ struct ScalarInputNode : public Node {
                   const Tensor& dEdf,
                   unsigned i,
                   Tensor& dEdxi) const override;
+  virtual bool supports_multibatch() const override { return true; }  
   const cnn::real data;
   const cnn::real* pdata;
 };

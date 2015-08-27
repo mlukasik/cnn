@@ -62,7 +62,9 @@ struct Tensor {
     } else {
       const unsigned bsize = d.batch_size();
       Dim new_d(d); new_d.bd = 1;
-      return Tensor(new_d, v + bsize * (b % d.batch_elems()) * sizeof(float));
+      Tensor ret(new_d, v + bsize * (b % d.batch_elems()));
+      // std::cerr << "Getting tensor for batch " << (b % d.batch_elems()) << " bsize: " << bsize << ", ptr=" << (long)ret.v << std::endl;
+      return ret;
     }
   }
 
@@ -75,7 +77,7 @@ struct Tensor {
       unsigned bsize = d.batch_size();
       Dim new_d = d; new_d.bd = 1;
       for(unsigned b = 0; b < d.batch_elems(); ++b)
-        bs[b] = Tensor(new_d, v + bsize * b * sizeof(float));
+        bs[b] = Tensor(new_d, v + bsize * b);
       return bs;
     }
   }

@@ -48,6 +48,7 @@ Dim InputNode::dim_forward(const vector<Dim>& xs) const {
 
 void InputNode::forward_impl(const vector<const Tensor*>& xs, Tensor& fx) const {
   assert(xs.size() == 0);
+  assert(pdata->size() == dim.size());
 #if HAVE_CUDA
   cudaMemcpyAsync(fx.v, &pdata->front(), dim.size() * sizeof(float), cudaMemcpyHostToDevice);
 #else

@@ -92,7 +92,10 @@ void SimpleExecutionEngine::backward() {
   }
   dEdfs->zero_allocated_memory();
   // initialize dE/dE = 1
-  ndEdfs.back().v = kSCALAR_ONE;
+  // ndEdfs.back().v = kSCALAR_ONE;
+  auto end = ndEdfs.back().v + nfxs.back().d.size();
+  for(auto it = ndEdfs.back().v; it < end; ++it)
+    *it = 1;
 
   // here we find constant paths to avoid doing extra work
   vector<bool> needs_derivative(num_nodes, false);
