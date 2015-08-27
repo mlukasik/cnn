@@ -76,7 +76,7 @@ const Tensor& SimpleExecutionEngine::incremental_forward(VariableIndex node_max_
 }
 
 void SimpleExecutionEngine::backward() {
-  if (nfxs.back().d.size() != 1) {
+  if (nfxs.back().d.batch_size() != 1) {
     cerr << "backward() called on non-scalar node.\n";
     abort();
   }

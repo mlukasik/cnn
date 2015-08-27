@@ -32,14 +32,14 @@ typedef float real;
 
 struct Tensor {
   Tensor() = default;
-  Tensor(const Dim& d, float* v) : d(d), v(v) { make_batches(); }
-  const Eigen::Map<Eigen::MatrixXf, Eigen::Aligned> operator*() const {
-    assert(d.batches() == 1);
-    return Eigen::Map<Eigen::MatrixXf, Eigen::Aligned>(v, d.rows(), d.cols());
+  Tensor(const Dim& d, float* v) : d(d), v(v) { }
+  const Eigen::Map<Eigen::MatrixXf, Eigen::Unaligned> operator*() const {
+    assert(d.batch_elems() == 1);
+    return Eigen::Map<Eigen::MatrixXf, Eigen::Unaligned>(v, d.rows(), d.cols());
   }
-  Eigen::Map<Eigen::MatrixXf, Eigen::Aligned> operator*() {
-    assert(d.batches() == 1);
-    return Eigen::Map<Eigen::MatrixXf, Eigen::Aligned>(v, d.rows(), d.cols());
+  Eigen::Map<Eigen::MatrixXf, Eigen::Unaligned> operator*() {
+    assert(d.batch_elems() == 1);
+    return Eigen::Map<Eigen::MatrixXf, Eigen::Unaligned>(v, d.rows(), d.cols());
   }
   // this is very slow: use sparingly
   inline bool is_valid() const {
@@ -54,21 +54,29 @@ struct Tensor {
 #endif
   }
 
-  // get a tensor representing a single batch
-  const Tensor& batch(unsigned b) const {
-    if(d.batches() == 1) {
+  // get a tensor representing a single batch.
+  // TODO: This is a bit wasteful, as it re-calculates bs.batch_size() every time.
+  Tensor batch_elem(unsigned b) const {
+    if(d.batch_elems() == 1) {
       return *this;
     } else {
-      assert(d.batches() == bs.size());
-      return bs[b % bs.size()];
+      const unsigned bsize = d.batch_size();
+      Dim new_d(d); new_d.bd = 1;
+      return Tensor(new_d, v + bsize * (b % d.batch_elems()) * sizeof(float));
     }
   }
-  Tensor& batch(unsigned b) {
-    if(d.batches() == 1) {
-      return *this;
+
+  // get tensors for all batches
+  std::vector<Tensor> batch_elems() const {
+    if(d.batch_elems() == 1) {
+      return std::vector<Tensor>(1, *this); 
     } else {
-      if(d.batches() != bs.size()) make_batches();
-      return bs[b % bs.size()];
+      std::vector<Tensor> bs(d.batch_elems());
+      unsigned bsize = d.batch_size();
+      Dim new_d = d; new_d.bd = 1;
+      for(unsigned b = 0; b < d.batch_elems(); ++b)
+        bs[b] = Tensor(new_d, v + bsize * b * sizeof(float));
+      return bs;
     }
   }
 
@@ -77,16 +85,6 @@ struct Tensor {
   std::vector<Tensor> bs;
 
  private:
-  void make_batches() {
-    if(d.batches() != 1) {
-      bs.clear();
-      unsigned bsize = d.batch_size();
-      Dim new_d = d; new_d.bd = 1;
-      for(unsigned b = 0; b < d.batches(); ++b) {
-        bs.push_back(Tensor(new_d, v + bsize * b * sizeof(float)));
-      }
-    }
-  }
 
   friend class boost::serialization::access;
   template<class Archive>

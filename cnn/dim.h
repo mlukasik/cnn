@@ -58,7 +58,7 @@ struct Dim {
   inline int ndims() const { return nd; }
   inline int rows() const { return d[0]; }
   inline int cols() const { return nd > 1 ? d[1] : 1; }
-  inline int batches() const { return bd; }
+  inline int batch_elems() const { return bd; }
   inline void set(unsigned i, unsigned s) { assert(i < nd); assert(s > 0); d[i] = s; }
   inline int operator[](unsigned i) const { return i < nd ? d[i] : 1; }
   inline int size(unsigned i) const { return (*this)[i]; }
