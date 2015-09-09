@@ -13,19 +13,19 @@ void SimpleExecutionEngine::invalidate() {
 }
 
 const Tensor& SimpleExecutionEngine::forward() { 
-  const VariableIndex node_max_index = (VariableIndex)cg.nodes.size();
+  const VariableIndex node_max_index = (VariableIndex)(cg.nodes.size() - 1);
   return forward(node_max_index);
 }
 
 const Tensor& SimpleExecutionEngine::forward(VariableIndex i) {
   invalidate();
-  return incremental_forward(i);
+  return incremental_forward((VariableIndex)(i + 1));
 }
 
 const Tensor& SimpleExecutionEngine::get_value(VariableIndex i) {
     assert(i < cg.nodes.size());
     if (i >= last_node_evaluated) {
-        incremental_forward(i);
+        incremental_forward((VariableIndex)(i + 1));
     }
     return nfxs[i];
 }
@@ -40,6 +40,7 @@ const Tensor& SimpleExecutionEngine::incremental_forward(VariableIndex node_max_
   if (last_node_evaluated == 0) fxs->free();
 
   assert(node_max_index > 0);
+  assert(node_max_index <= cg.nodes.size());
   nfxs.resize(node_max_index);
   if (node_max_index - last_node_evaluated == 0)
     return nfxs.back();

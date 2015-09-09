@@ -8,12 +8,17 @@
 #include <iosfwd>
 #include <cstring>
 #include <vector>
+#include <iostream>
 
 #define CNN_MAX_TENSOR_DIM 7
 
 namespace boost { namespace serialization { class access; } }
 
 namespace cnn {
+
+struct Dim;
+std::ostream& operator<<(std::ostream& os, const Dim& d);
+std::ostream& operator<<(std::ostream& os, const std::vector<Dim>& ds);
 
 struct Dim {
   Dim() : nd(), bd(1) {}
@@ -24,8 +29,11 @@ struct Dim {
   Dim(std::initializer_list<long> x) : nd(), bd(1) {
     for(auto v : x) d[nd++] = v;
   }
-  Dim(const std::vector<long> & x, int b) : nd(), bd(b) {
-    for(auto v : x) d[nd++] = v;
+  Dim (const Dim& other) : nd(other.nd), bd(other.bd) {
+    memcpy(&d, &other.d, nd * sizeof(unsigned int));
+  }
+  Dim (const Dim& other, int b) : nd(other.nd), bd(b) {
+    memcpy(&d, &other.d, nd * sizeof(unsigned int));
   }
   inline int size() const {
     return batch_size() * bd;

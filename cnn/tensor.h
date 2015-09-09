@@ -76,7 +76,8 @@ struct Tensor {
       std::vector<Tensor> bs(d.batch_elems());
       unsigned bsize = d.batch_size();
       Dim new_d = d; new_d.bd = 1;
-      for(unsigned b = 0; b < d.batch_elems(); ++b)
+      assert (d.batch_elems() >= 0);
+      for(unsigned b = 0; b < (unsigned)d.batch_elems(); ++b)
         bs[b] = Tensor(new_d, v + bsize * b);
       return bs;
     }
