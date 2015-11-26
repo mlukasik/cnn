@@ -41,6 +41,7 @@ Expression operator*(const Expression& x, const Expression& y);
 Expression operator*(const Expression& x, float y);
 inline Expression operator*(float y, const Expression& x) { return x * y; }
 inline Expression operator/(const Expression& x, float y) { return x * (1.f / y); }
+Expression operator/(float x, const Expression& y);
 // componentwise division
 Expression cdiv(const Expression& x, const Expression& y);
 Expression colwise_add(const Expression& x, const Expression& bias);

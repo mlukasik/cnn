@@ -73,6 +73,20 @@ Dim ConstScalarMultiply::dim_forward(const vector<Dim>& xs) const {
   return xs[0];
 }
 
+string ConstScalarQuotient::as_string(const vector<string>& arg_names) const {
+  ostringstream s;
+  s << alpha << " / " << arg_names[0];
+  return s.str();
+}
+
+Dim ConstScalarQuotient::dim_forward(const vector<Dim>& xs) const {
+  if (xs.size() != 1) {
+    cerr << "ConstScalarQuotient expects one argument: " << xs << endl;
+    throw std::invalid_argument("ConstScalarQuotient expects one argument");
+  }
+  return xs[0];
+}
+
 string DotProduct::as_string(const vector<string>& arg_names) const {
   ostringstream s;
   s << arg_names[0] << "^T . " << arg_names[1];

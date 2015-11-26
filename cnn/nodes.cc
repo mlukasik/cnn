@@ -119,6 +119,19 @@ void ConstScalarMultiply::backward_impl(const vector<const Tensor*>& xs,
   *dEdxi += *dEdf * alpha;
 }
 
+void ConstScalarQuotient::forward_impl(const vector<const Tensor*>& xs, Tensor& fx) const {
+  *fx = (**xs[0]).cwiseInverse() * alpha;
+}
+
+void ConstScalarQuotient::backward_impl(const vector<const Tensor*>& xs,
+                                   const Tensor& fx,
+                                   const Tensor& dEdf,
+                                   unsigned i,
+                                   Tensor& dEdxi) const {
+  assert(i == 0);
+  (*dEdxi).array() -= alpha / (*dEdf).array().square();
+}
+
 void DotProduct::forward_impl(const vector<const Tensor*>& xs, Tensor& fx) const {
   *fx = (**xs[0]).transpose() * (**xs[1]);
 }
