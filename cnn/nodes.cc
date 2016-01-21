@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <cmath>
+#include <functional>
 
 #include "cnn/functors.h"
 #if HAVE_CUDA
@@ -546,6 +547,24 @@ void Log::backward(const vector<const Tensor*>& xs,
   auto x = **xs[0];
   *dEdxi += (*dEdf).cwiseQuotient(x);
 }
+
+void Erf::forward(const vector<const Tensor*>& xs, Tensor& fx) const {
+  auto x = **xs[0];
+  // FIXME: there is surely a CUDA version
+  (*fx).array() = x.array().unaryExpr([](float z) { return std::erf(z); });
+}
+
+void Erf::backward(const vector<const Tensor*>& xs,
+                     const Tensor& fx,
+                     const Tensor& dEdf,
+                     unsigned i,
+                     Tensor& dEdxi) const {
+  auto x = **xs[0];
+  // gradient of erf(x) = 2/sqrt(pi) * exp (-x^2)
+  static cnn::real coefficient = 1.1283791670955126f; // 2/pi^0.5
+  (*dEdxi).array() += (*dEdf).array() * coefficient * (-x.array().square()).exp();
+}
+
 
 void Concatenate::forward(const vector<const Tensor*>& xs, Tensor& fx) const {
   unsigned rows = 0;

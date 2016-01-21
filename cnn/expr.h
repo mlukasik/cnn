@@ -51,6 +51,7 @@ Expression cube(const Expression& x);
 Expression log(const Expression& x);
 Expression logistic(const Expression& x);
 Expression rectify(const Expression& x);
+Expression erf(const Expression& x);
 Expression hinge(const Expression& x, unsigned index, float m = 1.0);
 Expression hinge(const Expression& x, const unsigned* pindex, float m = 1.0);
 Expression log_softmax(const Expression& x);
@@ -75,8 +76,8 @@ Expression huber_distance(const Expression& x, const Expression& y, float c = 1.
 Expression l1_distance(const Expression& x, const Expression& y);
 Expression binary_log_loss(const Expression& x, const Expression& y);
 Expression pairwise_rank_loss(const Expression& x, const Expression& y, real m=1.0);
-Expression poisson_loss(const Expression& x, unsigned y);
-Expression poisson_loss(const Expression& x, const unsigned* py);
+//Expression poisson_loss(const Expression& x, unsigned y);
+//Expression poisson_loss(const Expression& x, const unsigned* py);
 
 // various convolutiony things
 Expression conv1d_narrow(const Expression& x, const Expression& f);
