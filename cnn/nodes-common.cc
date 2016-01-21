@@ -676,6 +676,17 @@ Dim Rectify::dim_forward(const vector<Dim>& xs) const {
   return xs[0];
 }
 
+string Erf::as_string(const vector<string>& arg_names) const {
+  ostringstream s;
+  s << "ERF(" << arg_names[0] << ')';
+  return s.str();
+}
+
+Dim Erf::dim_forward(const vector<Dim>& xs) const {
+  assert(xs.size() == 1);
+  return xs[0];
+}
+
 string HuberDistance::as_string(const vector<string>& arg_names) const {
   ostringstream s;
   s << "|| " << arg_names[0] << " - " << arg_names[1] << " ||_H(" << d << ')';
