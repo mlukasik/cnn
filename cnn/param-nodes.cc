@@ -18,12 +18,12 @@ Dim ParameterNode::dim_forward(const vector<Dim>& xs) const {
   return dim;
 }
 
-void ParameterNode::forward(const vector<const Tensor*>& xs, Tensor& fx) const {
+void ParameterNode::forward_impl(const vector<const Tensor*>& xs, Tensor& fx) const {
   assert(xs.size() == 0);
   fx.v = params->values.v;
 }
 
-void ParameterNode::backward(const vector<const Tensor*>& xs,
+void ParameterNode::backward_impl(const vector<const Tensor*>& xs,
                     const Tensor& fx,
                     const Tensor& dEdf,
                                unsigned i,
@@ -46,16 +46,23 @@ Dim InputNode::dim_forward(const vector<Dim>& xs) const {
   return dim;
 }
 
-void InputNode::forward(const vector<const Tensor*>& xs, Tensor& fx) const {
+void InputNode::forward_impl(const vector<const Tensor*>& xs, Tensor& fx) const {
   assert(xs.size() == 0);
 #if HAVE_CUDA
   cudaMemcpyAsync(fx.v, &pdata->front(), dim.size() * sizeof(float), cudaMemcpyHostToDevice);
 #else
-  memcpy(fx.v, &pdata->front(), dim.size() * sizeof(float));
+  // TODO memcpy is only necessary if pdata->front() points to an unaligned location
+  // need to compute this value
+  bool is_input_address_aligned = false;
+  if (!is_input_address_aligned) {
+    memcpy(fx.v, &pdata->front(), dim.size() * sizeof(float));
+  } else {
+    fx.v = const_cast<float*>(&pdata->front());
+  }
 #endif
 }
 
-void InputNode::backward(const vector<const Tensor*>& xs,
+void InputNode::backward_impl(const vector<const Tensor*>& xs,
                     const Tensor& fx,
                     const Tensor& dEdf,
                                unsigned i,
@@ -74,7 +81,7 @@ Dim ScalarInputNode::dim_forward(const vector<Dim>& xs) const {
   return Dim({1});
 }
 
-void ScalarInputNode::forward(const vector<const Tensor*>& xs, Tensor& fx) const {
+void ScalarInputNode::forward_impl(const vector<const Tensor*>& xs, Tensor& fx) const {
   assert(xs.size() == 0);
 #if HAVE_CUDA
   cudaMemcpyAsync(fx.v, pdata, 1 * sizeof(float), cudaMemcpyHostToDevice);
@@ -83,7 +90,7 @@ void ScalarInputNode::forward(const vector<const Tensor*>& xs, Tensor& fx) const
 #endif
 }
 
-void ScalarInputNode::backward(const vector<const Tensor*>& xs,
+void ScalarInputNode::backward_impl(const vector<const Tensor*>& xs,
                                const Tensor& fx,
                                const Tensor& dEdf,
                                unsigned i,
@@ -102,13 +109,29 @@ Dim LookupNode::dim_forward(const vector<Dim>& xs) const {
   return dim;
 }
 
-void LookupNode::forward(const vector<const Tensor*>& xs, Tensor& fx) const {
+void LookupNode::forward_impl(const vector<const Tensor*>& xs, Tensor& fx) const {
   assert(xs.size() == 0);
-  assert(*pindex < params->values.size());
-  fx.v = params->values[*pindex].v;
+  if(pindex) {
+    assert(*pindex < params->values.size());
+    assert (fx.d.batch_elems() == 1);
+    fx.v = params->values[*pindex].v;
+  } else {
+    assert (pindices);
+    assert (fx.d.batch_elems() == pindices->size());
+    for (unsigned b = 0; b < pindices->size(); ++b) {
+      unsigned i = pindices->at(b);
+      assert (i < params->values.size());
+      float* v = fx.v + fx.d.batch_size() * (b % fx.d.batch_elems());
+#if HAVE_CUDA
+      cudaMemcpyAsync(v, params->values[i].v, fx.d.batch_size() * sizeof(float), cudaMemcpyDeviceToDevice);
+#else
+      memcpy(v, params->values[i].v, fx.d.batch_size() * sizeof(float));
+#endif
+    }
+  }
 }
 
-void LookupNode::backward(const vector<const Tensor*>& xs,
+void LookupNode::backward_impl(const vector<const Tensor*>& xs,
                             const Tensor& fx,
                             const Tensor& dEdf,
                             unsigned i,
@@ -118,7 +141,17 @@ void LookupNode::backward(const vector<const Tensor*>& xs,
 }
 
 void LookupNode::accumulate_grad(const Tensor& g) {
-  params->accumulate_grad(*pindex, g);
+  if(pindex) {
+    params->accumulate_grad(*pindex, g);
+  } else {
+    assert (pindices);
+    const vector<Tensor>& gb = g.batch_elems();
+    for (unsigned b = 0; b < pindices->size(); ++b) {
+      unsigned i = pindices->at(b);
+      assert (i < params->values.size());
+      params->accumulate_grad(i, gb[b]);
+    }
+  }
 }
 
 } // namespace cnn

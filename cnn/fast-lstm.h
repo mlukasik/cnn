@@ -1,5 +1,5 @@
-#ifndef CNN_LSTM_H_
-#define CNN_LSTM_H_
+#ifndef CNN_FAST_LSTM_H_
+#define CNN_FAST_LSTM_H_
 
 #include "cnn/cnn.h"
 #include "cnn/rnn.h"
@@ -11,12 +11,15 @@ namespace cnn {
 
 class Model;
 
-struct LSTMBuilder : public RNNBuilder {
-  LSTMBuilder() = default;
-  explicit LSTMBuilder(unsigned layers,
-                       unsigned input_dim,
-                       unsigned hidden_dim,
-                       Model* model);
+/*
+FastLSTM replaces the matrices from cell to other units, by diagonal matrices.
+*/
+struct FastLSTMBuilder : public RNNBuilder {
+  FastLSTMBuilder() = default;
+  explicit FastLSTMBuilder(unsigned layers,
+                           unsigned input_dim,
+                           unsigned hidden_dim,
+                           Model* model);
 
   Expression back() const override { return (cur == -1? h0.back() : h[cur].back()); }
   std::vector<Expression> final_h() const override { return (h.size() == 0 ? h0 : h.back()); }
