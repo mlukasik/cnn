@@ -14,6 +14,9 @@ namespace cnn {
 enum RNNState {CREATED, GRAPH_READY, READING_INPUT};
 enum RNNOp {new_graph, start_new_sequence, add_input};
 
+/*
+ *Michal: a class just to ensure the transitions are correct.
+ */
 class RNNStateMachine {
  public:
   RNNStateMachine() : q_(RNNState::CREATED) {}

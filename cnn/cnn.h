@@ -113,6 +113,10 @@ struct ComputationGraph {
 };
 
 // represents an SSA variable
+/*
+ * Michal: do they mean it is Static Single Assignment?
+ * As for below comment: there is no in_edge! Is this an obsolete comment? Perhaps it is now called 'args' ?
+ */
 // * in_edge is the **ordered** list of indices of the function arguments
 // * fx is the computed value of the variable
 // * dEdf is the derivative of the output with respect to the function
@@ -200,6 +204,10 @@ inline VariableIndex ComputationGraph::add_function(const std::initializer_list<
   return new_node_index;
 }
 
+/*
+ * Michal: I think name 'add_function' is misleading here;
+ * It should be called 'add node', or 'compute new node'
+ */
 template <class Function, typename T>
 inline VariableIndex ComputationGraph::add_function(const T& arguments) {
   VariableIndex new_node_index(nodes.size());

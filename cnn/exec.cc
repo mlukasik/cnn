@@ -45,6 +45,9 @@ const Tensor& SimpleExecutionEngine::incremental_forward(VariableIndex i) {
     nfxs.resize(i + 1);
 
     //vector<string> dummy(5, "x");
+    /*
+     * Michal: why is there 16 in initialization here??
+     */
     vector<const Tensor*> xs(16);
     for (; num_nodes_evaluated <= i; ++num_nodes_evaluated) {
       const Node* node = cg.nodes[num_nodes_evaluated];

@@ -30,6 +30,9 @@ namespace cnn {
 
 typedef float real;
 
+/*
+ * Michal: what does it represent? why do we need to wrap Eigen::Map? What is a batch?
+ */
 struct Tensor {
   Tensor() = default;
   Tensor(const Dim& d, float* v) : d(d), v(v) {}

@@ -40,6 +40,9 @@ struct Parameters : public ParametersBase {
   void accumulate_grad(const Tensor& g);
   void clear();
 
+  /*
+   * Michal: what is a difference between values and g?
+   */
   Dim dim;
   Tensor values;
   Tensor g;

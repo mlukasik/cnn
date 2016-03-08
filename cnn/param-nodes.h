@@ -60,6 +60,9 @@ struct ScalarInputNode : public Node {
   const cnn::real* pdata;
 };
 
+/*
+ * Michal: why does it implement methods of an Expression?
+ */
 // represents a matrix/vector embedding of an item of a discrete set (1-hot coding)
 struct LookupNode : public ParameterNodeBase {
   LookupNode(LookupParameters* p, unsigned ind) : dim(p->dim), index(ind), pindex(&index), indices(), pindices(), params(p) {}

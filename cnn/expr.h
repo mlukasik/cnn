@@ -57,6 +57,7 @@ Expression cube(const Expression& x);
 Expression log(const Expression& x);
 Expression logistic(const Expression& x);
 Expression rectify(const Expression& x);
+Expression erf(const Expression& x);
 Expression hinge(const Expression& x, unsigned index, float m = 1.0);
 Expression hinge(const Expression& x, const unsigned* pindex, float m = 1.0);
 Expression log_softmax(const Expression& x);

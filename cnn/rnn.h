@@ -88,6 +88,11 @@ struct RNNBuilder {
   RNNPointer cur;
  private:
   // the state machine ensures that the caller is behaving
+  /*
+   * Michal: what a confusing comment above!
+   * state machine just checks for errors in switching between states,
+   * so it is merely used for assertions for checking errors.
+   */
   RNNStateMachine sm;
   std::vector<RNNPointer> head; // head[i] returns the head position
 };

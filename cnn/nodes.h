@@ -305,6 +305,19 @@ struct Log : public Node {
                   Tensor& dEdxi) const override;
 };
 
+// y = erf x_1, Gauss error function = 2/\sqrt(\py) \int_0^x_1 exp (-t^2) dt
+struct Erf : public Node {
+  explicit Erf(const std::initializer_list<VariableIndex>& a) : Node(a) {}
+  std::string as_string(const std::vector<std::string>& arg_names) const override;
+  Dim dim_forward(const std::vector<Dim>& xs) const override;
+  void forward_impl(const std::vector<const Tensor*>& xs, Tensor& fx) const override;
+  void backward_impl(const std::vector<const Tensor*>& xs,
+                  const Tensor& fx,
+                  const Tensor& dEdf,
+                  unsigned i,
+                  Tensor& dEdxi) const override;
+};
+
 // concatenate rows
 struct Concatenate : public Node {
   template <typename T> explicit Concatenate(const T& a) : Node(a) {}
@@ -460,6 +473,10 @@ struct Negate : public Node {
   explicit Negate(const std::initializer_list<VariableIndex>& a) : Node(a) {}
   std::string as_string(const std::vector<std::string>& arg_names) const override;
   Dim dim_forward(const std::vector<Dim>& xs) const override;
+  /*
+   * Michal: it seems that xs is the list of inputs to the function, and fx is the output
+   * The question is why they suddenly work with Tensors.
+   */
   void forward_impl(const std::vector<const Tensor*>& xs, Tensor& fx) const override;
   void backward_impl(const std::vector<const Tensor*>& xs,
                   const Tensor& fx,
