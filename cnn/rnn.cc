@@ -75,7 +75,7 @@ Expression SimpleRNNBuilder::add_input_impl(int prev, const Expression &in) {
     // y <--- f(x)
     Expression y = affine_transform({vars[2], vars[0], x});
 
-    // y <--- g(y_prev)
+    // y <--- g(y, y_prev)
     if (prev == -1 && h0.size() > 0)
       y = affine_transform({y, vars[1], h0[i]});
     else if (prev >= 0)
