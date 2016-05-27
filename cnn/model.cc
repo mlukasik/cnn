@@ -49,6 +49,7 @@ void Parameters::g_squared_l2norm(float* sqnorm) const {
 #if HAVE_CUDA
   gpu::l2_norm_reducer(g.d.size(), g.v, sqnorm, true, false);
 #else
+//  cout << "[Parameters::g_squared_l2norm]" << *g << endl;
   *sqnorm = (*g).squaredNorm();
 #endif
 }
@@ -175,7 +176,10 @@ void Model::project_weights(float radius) {
 
 float Model::gradient_l2_norm() const {
   if (!gradient_norm_scratch)
-    gradient_norm_scratch = (float*)cnn_mm_malloc(all_params.size() * sizeof(float), 256);
+  {
+	  cout << "[Model::gradient_l2_norm()] !gradient_norm_scratch" << endl;
+	  gradient_norm_scratch = (float*)cnn_mm_malloc(all_params.size() * sizeof(float), 256);
+  }
   int pi = 0;
   for (auto p : all_params) {
     p->g_squared_l2norm(&gradient_norm_scratch[pi]);

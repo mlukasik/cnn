@@ -207,19 +207,19 @@ void ComputationGraph::backward() { ee->backward(); }
 void ComputationGraph::backward(VariableIndex i) { ee->backward(i); }
 
 void ComputationGraph::PrintGraphviz() const {
-  cerr << "digraph G {\n  rankdir=LR;\n  nodesep=.05;\n";
+  cout << "digraph G {\n  rankdir=LR;\n  nodesep=.05;\n";
   unsigned nc = 0;
   for (auto node : nodes) {
     vector<string> var_names;
     for (auto arg : node->args)
       var_names.push_back(string("v") + to_string((unsigned)arg));
-    cerr << "  N" << nc << " [label=\"v" << nc << " = "
+    cout << "  N" << nc << " [label=\"v" << nc << " = "
          << node->as_string(var_names) << "\"];\n";
     for (auto arg : node->args)
-      cerr << "  N" << ((unsigned)arg) << " -> N" << nc << ";\n";
+    	cout << "  N" << ((unsigned)arg) << " -> N" << nc << ";\n";
     ++nc;
   }
-  cerr << "}\n";
+  cout << "}\n";
 }
 
 }  // namespace cnn

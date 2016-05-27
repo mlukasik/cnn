@@ -130,8 +130,11 @@ void ConstScalarQuotient::backward_impl(const vector<const Tensor*>& xs,
                                    unsigned i,
                                    Tensor& dEdxi) const {
   assert(i == 0);
-  (*dEdxi).array() -= alpha / (*dEdf).array().square();
+//  cout << "[ConstScalarQuotient::backward_impl] xs.size()=" << xs.size() << endl;
+  //originally: alpha / (*dEdf).array().square()" << alpha / (*dEdf).array().square() << endl;
+  (*dEdxi).array() -= (*dEdf).array().cwiseProduct(alpha / ((**xs[0])).array().square());//today
 }
+
 
 void DotProduct::forward_impl(const vector<const Tensor*>& xs, Tensor& fx) const {
   *fx = (**xs[0]).transpose() * (**xs[1]);

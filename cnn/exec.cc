@@ -80,12 +80,36 @@ const Tensor& SimpleExecutionEngine::incremental_forward(VariableIndex i) {
 }
 
 void SimpleExecutionEngine::backward() {
+//	cout << "[SimpleExecutionEngine::backward()] START" << endl;
     assert(nfxs.size() == cg.nodes.size());
     backward((VariableIndex)(cg.nodes.size()-1));
+//    cout << "Printing the forwards " << endl;
+//    for(int idx=0;idx<nfxs.size();idx++)
+//    {
+//    	cout << "idx=" << idx << endl;
+//    	cout << "nfxs[idx]=" << nfxs[idx] << endl;
+//    	cout << "ndEdfs[idx]=" << ndEdfs[idx] << endl;
+//    	cout << "=======" << endl;
+//    }
+//    int i=0;
+//    for (auto & p: nfxs)
+//    {
+//    	cout << "index=" << i++ << endl;
+//    	cout << p << endl;
+//    }
+//    cout << "Printing the backs " << endl;
+//    i=0;
+//    for (auto & p: ndEdfs)
+//        {
+//    	cout << "index=" << i++ << endl;
+//        	cout << p << endl;
+//        }
+//	cout << "[SimpleExecutionEngine::backward()] END" << endl;
 }
 
 // TODO what is happening with parameter nodes if from_where > param_node_id ?
 void SimpleExecutionEngine::backward(VariableIndex from_where) {
+cout << "[SimpleExecutionEngine::backward()] START from_where=" << from_where << endl;
   assert(from_where+1 <= nfxs.size());
   assert(from_where+1 <= cg.nodes.size());
   if (nfxs[from_where].d.size() != 1) {

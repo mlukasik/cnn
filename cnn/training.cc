@@ -13,7 +13,7 @@ float Trainer::clip_gradients() {
   if (clipping_enabled) {
     float gg = model->gradient_l2_norm();
     if (isnan(gg) || isinf(gg)) {
-      cerr << "Magnitude of gradient is bad: " << gg << endl;
+      cout << "Magnitude of gradient is bad: " << gg << endl;
       abort();
     }
     if (gg > clip_threshold) {

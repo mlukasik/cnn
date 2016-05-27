@@ -40,7 +40,7 @@ void Initialize(int& argc, char**& argv, unsigned random_seed) {
   kSCALAR_ZERO = (float*) cnn_mm_malloc(sizeof(float), 256);
   *kSCALAR_ZERO = 0;
 #endif
-  unsigned long num_mb = 512UL;
+  unsigned long num_mb = 1024UL;
   int argi = 1;
   while(argi < argc) {
     string arg = argv[argi];
