@@ -42,8 +42,10 @@ void Initialize(int& argc, char**& argv, unsigned random_seed) {
 #endif
   unsigned long num_mb = 1024UL;
   int argi = 1;
+  cerr << "[init.cc] Iterating over arguments..." << endl;
   while(argi < argc) {
     string arg = argv[argi];
+    cerr << "[init.cc] arg=" << arg << endl;
     if (arg == "--cnn-mem") {
       if ((argi + 1) > argc) {
         cerr << "[cnn] --cnn-mem expects an argument (the memory, in megabytes, to reserve)\n";
@@ -65,7 +67,7 @@ void Initialize(int& argc, char**& argv, unsigned random_seed) {
     } else if (arg.find("--cnn") == 0) {
       cerr << "[cnn] Bad command line argument: " << arg << endl;
       abort();
-    } else { break; }
+    } else { argi++; }
   }
   if (random_seed == 0) {
     random_device rd;
